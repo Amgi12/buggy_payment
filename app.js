@@ -1,168 +1,184 @@
 (function () {
   "use strict";
 
-  const form = document.getElementById("payment-form");
-  const cardNumber = document.getElementById("card-number");
-  const cardExp = document.getElementById("card-exp");
-  const cardCvv = document.getElementById("card-cvv");
-  const email = document.getElementById("billing-email");
-  const errCard = document.getElementById("err-card");
-  const errExp = document.getElementById("err-exp");
-  const errCvv = document.getElementById("err-cvv");
-  const errEmail = document.getElementById("err-email");
-  const submitBtn = document.getElementById("submit-pay");
-  const toast = document.getElementById("toast");
+  var form = document.getElementById("payment-form");
+  var nameInput = document.getElementById("full-name");
+  var emailInput = document.getElementById("email");
+  var amountInput = document.getElementById("amount");
+  var methodSelect = document.getElementById("method");
+  var termsCheckbox = document.getElementById("terms");
+  var termsBlock = document.querySelector(".terms-block");
+  var payBtn = document.getElementById("pay-btn");
+  var payStatus = document.getElementById("pay-status");
+  var summaryTotal = document.getElementById("summary-total-display");
 
-  let cvvFeedbackTimer = null;
+  var VALIDATION_DELAY_MS = 1400;
+  var timers = {};
 
-  function stripSpaces(digits) {
-    return digits.replace(/\s+/g, "");
+  function debounceField(id, fn) {
+    clearTimeout(timers[id]);
+    timers[id] = setTimeout(fn, VALIDATION_DELAY_MS);
   }
 
-  function showToast(message) {
-    toast.textContent = message;
-    toast.hidden = false;
-    clearTimeout(showToast._t);
-    showToast._t = setTimeout(function () {
-      toast.hidden = true;
-      toast.textContent = "";
-    }, 5200);
+  function setError(el, message) {
+    if (!el) return;
+    el.textContent = message || "";
   }
 
-  function validateCardNumber() {
-    const raw = stripSpaces(cardNumber.value);
-    errCard.hidden = true;
-    errCard.textContent = "";
-    if (!raw) {
-      errCard.textContent = "Card number is required.";
-      errCard.hidden = false;
-      return false;
-    }
-    if (!/^\d{16,19}$/.test(raw)) {
-      /* Intentionally vague — does not distinguish length vs checksum */
-      errCard.textContent = "That does not look right.";
-      errCard.hidden = false;
-      return false;
-    }
-    return true;
-  }
-
-  function validateExp() {
-    const v = cardExp.value.trim();
-    errExp.hidden = true;
-    errExp.textContent = "";
-    const m = v.match(/^(\d{2})\s*\/\s*(\d{2})$/);
-    if (!m) {
-      errExp.textContent = "Use MM / YY.";
-      errExp.hidden = false;
-      return false;
-    }
-    return true;
+  function validateName() {
+    var v = nameInput.value.trim();
+    if (!v) return "Name is required.";
+    if (v.length < 2) return "Enter at least two characters.";
+    return "";
   }
 
   function validateEmail() {
-    const v = email.value.trim();
-    errEmail.hidden = true;
-    errEmail.textContent = "";
-    if (!v) {
-      errEmail.textContent = "Email is required.";
-      errEmail.hidden = false;
-      return false;
-    }
-    /* Loose pattern — allows some invalid hosts; subtle spec gap for hunters */
-    if (!/^[^\s@]+@[^\s@]+$/.test(v)) {
-      errEmail.textContent = "Please double-check this field.";
-      errEmail.hidden = false;
-      return false;
-    }
-    return true;
+    var v = emailInput.value.trim();
+    if (!v) return "Email is required.";
+    /* Intentionally loose: allows confusion with strict HTML5 validation elsewhere */
+    var basic = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!basic.test(v)) return "Enter a valid email address.";
+    return "";
   }
 
-  function clearCvvTimer() {
-    if (cvvFeedbackTimer) {
-      clearTimeout(cvvFeedbackTimer);
-      cvvFeedbackTimer = null;
-    }
+  function validateAmount() {
+    var raw = amountInput.value.trim().replace(/,/g, "");
+    if (!raw) return "Amount is required.";
+    var n = parseFloat(raw);
+    if (Number.isNaN(n) || n <= 0) return "Enter a positive number.";
+    if (!/^\d+(\.\d{1,2})?$/.test(raw)) return "Use up to two decimal places.";
+    return "";
   }
 
-  function applyCvvValidation(showImmediately) {
-    const v = cardCvv.value.trim();
-    errCvv.hidden = true;
-    errCvv.textContent = "";
+  function validateMethod() {
+    return methodSelect.value ? "" : "Choose a payment method.";
+  }
 
-    function setError() {
-      /* Delayed / ambiguous messaging for empty or short CVV */
-      if (!v || v.length < 3) {
-        errCvv.textContent = "Verification incomplete.";
-        errCvv.hidden = false;
+  function syncSummaryTotal() {
+    var raw = amountInput.value.trim().replace(/,/g, "");
+    var n = parseFloat(raw);
+    if (!raw || Number.isNaN(n) || n <= 0) {
+      summaryTotal.textContent = "—";
+      return;
+    }
+    summaryTotal.textContent =
+      "$" +
+      n.toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+  }
+
+  function scheduleValidate(fieldKey) {
+    debounceField(fieldKey, function () {
+      var err = "";
+      if (fieldKey === "name") {
+        err = validateName();
+        setError(document.getElementById("error-name"), err);
+      } else if (fieldKey === "email") {
+        err = validateEmail();
+        setError(document.getElementById("error-email"), err);
+      } else if (fieldKey === "amount") {
+        err = validateAmount();
+        setError(document.getElementById("error-amount"), err);
+        syncSummaryTotal();
+      } else if (fieldKey === "method") {
+        err = validateMethod();
+        setError(document.getElementById("error-method"), err);
       }
-    }
-
-    clearCvvTimer();
-    if (showImmediately) {
-      setError();
-      return v.length >= 3;
-    }
-    /* Staggered feedback on blur — easy to miss if user submits quickly */
-    cvvFeedbackTimer = setTimeout(setError, 1100);
-    return !v || v.length < 3 ? false : true;
+    });
   }
 
-  cardNumber.addEventListener("blur", validateCardNumber);
-  cardExp.addEventListener("blur", validateExp);
-  email.addEventListener("blur", validateEmail);
-
-  cardCvv.addEventListener("input", function () {
-    errCvv.hidden = true;
-    errCvv.textContent = "";
-    clearCvvTimer();
+  nameInput.addEventListener("input", function () {
+    scheduleValidate("name");
+  });
+  nameInput.addEventListener("blur", function () {
+    scheduleValidate("name");
   });
 
-  cardCvv.addEventListener("blur", function () {
-    applyCvvValidation(false);
+  emailInput.addEventListener("input", function () {
+    scheduleValidate("email");
+  });
+  emailInput.addEventListener("blur", function () {
+    scheduleValidate("email");
   });
 
+  amountInput.addEventListener("input", function () {
+    syncSummaryTotal();
+    scheduleValidate("amount");
+  });
+  amountInput.addEventListener("blur", function () {
+    scheduleValidate("amount");
+  });
+
+  methodSelect.addEventListener("change", function () {
+    scheduleValidate("method");
+  });
+
+  /* Faux “check” toggles visuals only; real checkbox stays disabled and false */
+  termsBlock.addEventListener("click", function (e) {
+    var t = e.target;
+    if (t && t.closest && t.closest(".inline-link")) return;
+    if (termsCheckbox.disabled) {
+      termsBlock.classList.toggle("is-faux-checked");
+    }
+  });
+
+  function allFieldsNonEmpty() {
+    return (
+      nameInput.value.trim() &&
+      emailInput.value.trim() &&
+      amountInput.value.trim() &&
+      methodSelect.value
+    );
+  }
+
+  function synchronousErrorsClear() {
+    return (
+      !validateName() &&
+      !validateEmail() &&
+      !validateAmount() &&
+      !validateMethod()
+    );
+  }
+
+  /**
+   * Pay button: under certain conditions, click yields no immediate feedback.
+   * Conditions (subtle):
+   * - Form values pass quick sync validation, but delayed validation hasn't
+   *   painted errors yet (hunters may click in the gap).
+   * - Terms: real checkbox never checks; we require termsCheckbox.checked
+   *   for submit — faux check does not count.
+   */
   form.addEventListener("submit", function (e) {
     e.preventDefault();
 
-    const okNum = validateCardNumber();
-    const okExp = validateExp();
-    const okEmail = validateEmail();
-    /* Force synchronous CVV message if user never waited for delayed blur */
-    const okCvv = applyCvvValidation(true);
-
-    const consentRules = document.getElementById("consent-rules").checked;
-    const consentCharges = document.getElementById("consent-charges").checked;
-
-    if (!consentRules || !consentCharges) {
-      showToast("Action could not be completed.");
+    if (!allFieldsNonEmpty()) {
+      payStatus.textContent = "Please complete all fields.";
       return;
     }
 
-    if (!okNum || !okExp || !okEmail || !okCvv) {
-      /* Generic copy — does not map to specific field */
-      showToast("Please review the form and try again.");
+    if (!synchronousErrorsClear()) {
+      payStatus.textContent = "Fix the highlighted fields.";
       return;
     }
 
-    submitBtn.disabled = true;
-    submitBtn.classList.add("is-loading");
-    const spinner = submitBtn.querySelector(".btn-spinner");
-    const label = submitBtn.querySelector(".btn-label");
-    spinner.hidden = false;
+    /* Silent no-op: terms not actually accepted (disabled input cannot be checked) */
+    if (!termsCheckbox.checked) {
+      /* No status text — intentional lack of immediate feedback */
+      return;
+    }
 
-    /* Status text lags behind spinner — temporal inconsistency */
-    const statusDelay = setTimeout(function () {
-      label.textContent = "Processing…";
-    }, 450);
+    payBtn.classList.add("is-busy");
+    payBtn.disabled = true;
+    payStatus.textContent = "Processing…";
 
-    setTimeout(function () {
-      clearTimeout(statusDelay);
-      submitBtn.disabled = false;
-      submitBtn.classList.remove("is-loading");
-      spinner.hidden = true;
-      label.textContent = "Pay $238.50";
-      showToast("Demo only — no charge was sent.");
-    }, 2200);
+    window.setTimeout(function () {
+      payBtn.classList.remove("is-busy");
+      payBtn.disabled = false;
+      payStatus.textContent = "Demo only — no charge was made.";
+    }, 1800);
   });
+
+  syncSummaryTotal();
 })();
