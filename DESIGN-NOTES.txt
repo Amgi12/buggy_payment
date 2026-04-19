@@ -1,0 +1,34 @@
+BugHunt Summit — intentional UI variance index (organizer / judge reference)
+=============================================================================
+
+This checkout demo embeds subtle, front-end-only inconsistencies for participant
+exercises. No backend or payment processing is implemented.
+
+Visual / layout
+---------------
+- Order line "Platform fee" uses a slight vertical shift (translateY).
+- Divider before "Total due" uses margins that do not match other vertical rhythm.
+- Total amount is shifted 1px vs. the "Total due" label baseline.
+- CVV column has extra left padding; checkbox row uses a different icon offset.
+- Primary button shadow is asymmetric (intentional "polish" glitch).
+
+Color / contrast
+----------------
+- Fine print and field hints use softer gray; small text may sit near contrast limits.
+- Toast uses a low-saturation red tint (still visible, not WCAG-breaking on purpose).
+
+Focus / interaction
+-------------------
+- Expiry field uses a thinner focus ring than other inputs.
+
+Timing / copy
+-------------
+- CVV validation message on blur is delayed (~1.1s); rapid submit shows a generic toast.
+- Submit shows spinner before the label changes to "Processing…" (~450ms gap).
+- Some errors are vague ("That does not look right.", "Verification incomplete.",
+  "Action could not be completed.").
+
+Accessibility stance
+--------------------
+- Skip link, labels, landmarks, and live regions are present so the page is usable
+  with keyboard and AT; hunt items skew toward visual timing and copy, not traps.

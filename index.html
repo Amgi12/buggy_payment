@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BugHunt Summit — Secure Checkout</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to checkout form</a>
+
+    <div class="page">
+      <header class="site-header" role="banner">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <div class="brand-text">
+            <span class="brand-name">BugHunt Summit</span>
+            <span class="brand-tag">Technical Event · Secure Payments</span>
+          </div>
+        </div>
+        <nav class="header-meta" aria-label="Checkout context">
+          <span class="badge">TLS 1.3</span>
+          <span class="session-pill" title="Session reference">CHK-9F2A</span>
+        </nav>
+      </header>
+
+      <main id="main-content" class="layout" role="main">
+        <section class="panel panel--summary" aria-labelledby="summary-heading">
+          <div class="panel-head">
+            <h1 id="summary-heading" class="panel-title">Order summary</h1>
+            <p class="panel-lede">
+              Complete registration for the live bug hunt track. You will receive a badge and
+              challenge scope after payment.
+            </p>
+          </div>
+
+          <ul class="order-lines">
+            <li class="order-line">
+              <span class="order-line__label">Competitor pass — 2 days</span>
+              <span class="order-line__value">$189.00</span>
+            </li>
+            <li class="order-line">
+              <span class="order-line__label">Workshop add-on</span>
+              <span class="order-line__value">$45.00</span>
+            </li>
+            <li class="order-line order-line--subtle-shift">
+              <span class="order-line__label">Platform fee</span>
+              <span class="order-line__value">$4.50</span>
+            </li>
+          </ul>
+
+          <div class="divider divider--inconsistent" aria-hidden="true"></div>
+
+          <div class="total-row">
+            <span class="total-row__label">Total due</span>
+            <span class="total-row__amount" id="total-amount">$238.50</span>
+          </div>
+
+          <p class="fine-print fine-print--low-contrast">
+            Charges appear as <span class="mono">BUGHUNT* SUMMIT</span> on your statement. Currency
+            USD. Refunds follow the
+            <a href="#terms">event policy</a>.
+          </p>
+        </section>
+
+        <section class="panel panel--pay" aria-labelledby="pay-heading">
+          <div class="panel-head">
+            <h2 id="pay-heading" class="panel-title">Payment details</h2>
+            <p class="panel-lede">
+              Card information is processed by our PCI-compliant partner. We never store full card
+              numbers on event servers.
+            </p>
+          </div>
+
+          <form id="payment-form" class="pay-form" novalidate>
+            <div class="field-group">
+              <label for="card-name">Name on card</label>
+              <input
+                id="card-name"
+                name="cardName"
+                type="text"
+                autocomplete="cc-name"
+                placeholder="As printed on card"
+                required
+                aria-describedby="hint-name"
+              />
+              <p id="hint-name" class="field-hint">Use the same spelling as your ID for check-in.</p>
+            </div>
+
+            <div class="field-row">
+              <div class="field-group field-group--tight-gap">
+                <label for="card-number">Card number</label>
+                <input
+                  id="card-number"
+                  name="cardNumber"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="cc-number"
+                  placeholder="4242 4242 4242 4242"
+                  required
+                  maxlength="19"
+                  aria-describedby="hint-card err-card"
+                />
+                <p id="hint-card" class="field-hint">16–19 digits. Spaces optional.</p>
+                <p id="err-card" class="field-error" role="alert" aria-live="polite" hidden></p>
+              </div>
+            </div>
+
+            <div class="field-row field-row--split">
+              <div class="field-group">
+                <label for="card-exp">Expiry</label>
+                <input
+                  id="card-exp"
+                  name="cardExp"
+                  type="text"
+                  autocomplete="cc-exp"
+                  placeholder="MM / YY"
+                  required
+                  aria-describedby="err-exp"
+                />
+                <p id="err-exp" class="field-error" role="alert" aria-live="polite" hidden></p>
+              </div>
+              <div class="field-group field-group--cvv-nudge">
+                <label for="card-cvv">Security code</label>
+                <input
+                  id="card-cvv"
+                  name="cardCvv"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="cc-csc"
+                  placeholder="123"
+                  required
+                  maxlength="4"
+                  aria-describedby="hint-cvv err-cvv"
+                />
+                <p id="hint-cvv" class="field-hint">3 or 4 digits on the back (or front for Amex).</p>
+                <p id="err-cvv" class="field-error field-error--delayed" role="alert" aria-live="polite" hidden></p>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label for="billing-email">Receipt email</label>
+              <input
+                id="billing-email"
+                name="billingEmail"
+                type="email"
+                autocomplete="email"
+                placeholder="you@company.com"
+                required
+                aria-describedby="err-email"
+              />
+              <p id="err-email" class="field-error" role="alert" aria-live="polite" hidden></p>
+            </div>
+
+            <fieldset class="consent">
+              <legend class="consent-legend">Acknowledgements</legend>
+              <label class="checkbox">
+                <input id="consent-rules" type="checkbox" required />
+                <span>I agree to the competition rules and code of conduct.</span>
+              </label>
+              <label class="checkbox checkbox--offset-icon">
+                <input id="consent-charges" type="checkbox" required />
+                <span>I authorize this charge and understand refund windows.</span>
+              </label>
+            </fieldset>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="submit-pay">
+                <span class="btn-label">Pay $238.50</span>
+                <span class="btn-spinner" aria-hidden="true" hidden></span>
+              </button>
+              <p class="secondary-action">
+                <button type="button" class="link-button">Save for later</button>
+              </p>
+            </div>
+          </form>
+
+          <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <p id="terms" class="footer-note">
+          BugHunt Summit is a technical skills event. Need help?
+          <a href="mailto:support@bughunt.example">support@bughunt.example</a>
+        </p>
+      </footer>
+    </div>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
