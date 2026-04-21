@@ -115,12 +115,12 @@
     scheduleValidate("method");
   });
 
-  /* Faux “check” toggles visuals only; real checkbox stays disabled and false */
-  termsBlock.addEventListener("click", function (e) {
-    var t = e.target;
-    if (t && t.closest && t.closest(".inline-link")) return;
-    if (termsCheckbox.disabled) {
-      termsBlock.classList.toggle("is-faux-checked");
+  /* Real checkbox drives the visuals */
+  termsCheckbox.addEventListener("change", function () {
+    if (termsCheckbox.checked) {
+      termsBlock.classList.add("is-faux-checked");
+    } else {
+      termsBlock.classList.remove("is-faux-checked");
     }
   });
 
@@ -163,11 +163,7 @@
       return;
     }
 
-    /* Silent no-op: terms not actually accepted (disabled input cannot be checked) */
-    if (!termsCheckbox.checked) {
-      /* No status text — intentional lack of immediate feedback */
-      return;
-    }
+    /* Intentional BUG: Verification of termsCheckbox is skipped! */
 
     payBtn.classList.add("is-busy");
     payBtn.disabled = true;
@@ -176,7 +172,8 @@
     window.setTimeout(function () {
       payBtn.classList.remove("is-busy");
       payBtn.disabled = false;
-      payStatus.textContent = "Demo only — no charge was made.";
+      payStatus.textContent = "";
+      alert("Payment was successful!");
     }, 1800);
   });
 

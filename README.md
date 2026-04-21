@@ -49,13 +49,25 @@ Treat this like a **real registration checkout**: complete the form, accept term
 
 The following items are **intentional UI-only issues** embedded for the exercise:
 
-1. **Terms checkbox** — The real checkbox is **disabled** and never becomes checked. A **faux** checked state is toggled via the surrounding block; visually it can look accepted while the real control is not.
-2. **Pay now** — When the real terms box is not checked, submit can **exit without status text** (no immediate error or loading feedback).
-3. **Delayed validation** — Errors are debounced (~**1.4s**), so feedback can lag behind typing or blur.
-4. **Email errors** — Error text for email uses **muted** styling so it is **harder to read** than other field errors.
-5. **Inconsistent validation triggers** — Payment method validation is primarily tied to **`change`**, not the same blur/input pattern as other fields.
-6. **Visual / micro-UI** — Minor **misalignment** (summary row, amount column width, small field nudges), **asymmetric** focus styling on the amount field, and slightly different **focus** treatment on the primary button vs inputs.
-7. **Copy ambiguity** — “Work email” vs hints about receipts/access can confuse expectations.
+1. **Terms checkbox validation** — The form can cleanly submit and produce a "payment successful" alert even if the "Terms & Conditions" checkbox is left unchecked by the user. The submit handler fails to mandate the acceptance of terms.
+
+2. **Delayed validation** — Errors are debounced (~**1.4s**), so feedback can lag behind typing or blur.
+They type something invalid into a field (like "hello" into the amount field).
+They click away to the next field (the blur event).
+Nothing happens immediately.
+They wait about 1.4 seconds, and completely out of nowhere, an error message finally pops up.
+
+3. **Inconsistent validation triggers** — Payment method validation is primarily tied to **`change`**, not the same blur/input pattern as other fields.
+ Imagine a user clicks the "Payment method" dropdown, looks at the options, but clicks away without selecting anything (triggering a blur). Because there is no blur listener, no error message appears to warn them that they missed the field. They will only find out they missed it when they click the "Pay now" button and the whole form validation runs.
+
+It creates an uneven user experience where some fields hold your hand and warn you immediately if you skip them, but the Payment Method field stays completely silent!
+
+4. **Visual / micro-UI** — Severe **misalignment** (summary row visibly crooked) and intensely **asymmetric** focus styling on the amount field.
+Jolted the "Platform fee" row: It now explicitly sticks out 14px to the right (padding-left: 14px). It's very visibly crooked now. Heavy Asymmetric Focus Glitch: The Amount field focus ring now draws a huge, thick 5px stroke on the right side only.
+
+5. **Amount field lacks limits** — There is no maximum limit or sanity check in the amount field. Absurdly high amounts (e.g., trillions of dollars) can be entered and will produce a "payment successful" alert, whereas real-life payment processors would block this.
+
+6. **Name field missing sanitization** — The "Full name" field accepts any characters, including pure numbers or special symbols (e.g., "12345" or "@#%"), allowing users to successfully check out with completely invalid name formats.
 
 Use this list to score submissions, run walkthroughs, or tune difficulty (e.g. remove or add hints).
 

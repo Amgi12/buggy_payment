@@ -196,10 +196,10 @@ body {
   font-size: 0.95rem;
 }
 
-/* Subtle misalignment: one row nudged */
+/* Blatant misalignment: one row vastly nudged */
 .summary-detail--offset {
-  padding-left: 3px;
-  margin-right: -2px;
+  padding-left: 14px;
+  margin-right: -12px;
 }
 
 .summary-total {
@@ -226,14 +226,6 @@ body {
   }
 }
 
-/* Slight column imbalance */
-.field--name {
-  padding-right: 2px;
-}
-
-.field--email {
-  margin-left: 1px;
-}
 
 .field--amount {
   grid-column: 1 / -1;
@@ -282,9 +274,9 @@ body {
   box-shadow: 0 0 0 3px rgba(61, 139, 253, 0.2);
 }
 
-/* Micro-glitch: amount focus ring slightly asymmetric */
+/* Intense glitch: amount focus ring heavily asymmetric */
 .field--amount input:focus {
-  box-shadow: 2px 0 0 3px rgba(61, 139, 253, 0.18), -1px 0 0 2px rgba(61, 139, 253, 0.12);
+  box-shadow: 8px 0 0 5px rgba(61, 139, 253, 0.35), -3px 0 0 2px rgba(61, 139, 253, 0.12);
 }
 
 .amount-wrap {
@@ -342,11 +334,6 @@ body {
   color: var(--danger);
 }
 
-/* Subtle contrast: email errors harder to see */
-.field-error--muted {
-  color: #8b4a4a;
-  opacity: 0.85;
-}
 
 .terms-block {
   margin-top: 1.35rem;
@@ -479,10 +466,10 @@ body {
   transform: translateY(1px);
 }
 
-/* Hover/focus mismatch: focus ring offset differs from other fields */
+/* Fixed bug: consistent focus ring matching other fields */
 .btn-primary:focus-visible {
-  outline: 2px solid #9dc6ff;
-  outline-offset: 1px;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(61, 139, 253, 0.2);
 }
 
 .btn-primary.is-busy {
